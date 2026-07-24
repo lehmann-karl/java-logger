@@ -1,23 +1,38 @@
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 public class LogStyle {
 
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    public @interface TokenStyle {
+        LogStyle.AnsiColor color() default AnsiColor.RESET;
+        boolean bold() default false;
+        boolean italic() default false;
+        boolean underline() default false;
+    }
+
     public enum AnsiColor {
-        BLACK(30),
-        RED(31),
-        GREEN(32),
-        YELLOW(33),
-        BLUE(34),
-        MAGENTA(35),
-        CYAN(36),
-        WHITE(37),
-        RESET(0);
+        BLACK("30"),
+        RED("31"),
+        DARK_RED("38;5;88"),
+        GREEN("32"),
+        YELLOW("33"),
+        BLUE("34"),
+        MAGENTA("35"),
+        CYAN("36"),
+        WHITE("37"),
+        RESET("0");
 
-        private final int code;
+        private final String code;
 
-        AnsiColor(int code) {
+        AnsiColor(String code) {
             this.code = code;
         }
 
-        public int code() {
+        public String code() {
             return code;
         }
     }
@@ -45,7 +60,7 @@ public class LogStyle {
         }
 
         public Builder underline(boolean underline) {
-            this.bold = underline;
+            this.underline = underline;
             return this;
         }
 

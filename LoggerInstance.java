@@ -1,16 +1,16 @@
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public final class LoggerInstance {
 
     private String source;
 
-    public LoggerInstance(String source) {
-        this.source = Objects.requireNonNullElse(source, Logger.config.defaultSource());
+    protected LoggerInstance(String source) {
+        this.source = source != null ? source : Logger.config.defaultSource();
     }
 
     public void setSource(String source) {
-        this.source = Objects.requireNonNullElse(source, Logger.config.defaultSource());
+        this.source = source != null ? source : Logger.config.defaultSource();
     }
 
     public void log(String message) {
@@ -41,14 +41,20 @@ public final class LoggerInstance {
         emit(Logger.Level.FATAL, message);
     }
 
-    private void emit(Logger.Level level, String message) {
-        List<String> tokens = new LogEvent(level, source, message).format();
-
-        System.out.println(String.join(" ", tokens));
+    private void emit(Logger.Level level, String message) {        
+        emit(new LogEvent(level, source, message));
     }
 
     private void emit(LogEvent log) {
-        List<String> tokens = log.format();
-        System.out.println(String.join(" ", tokens));
+        List<LogToken> tokens = log.format();
+        List<String> output = new ArrayList<>();
+
+        for (LogToken token : tokens) {
+            String tokenRep = token.render();
+            String styledToken = LogTheme.getStyle(token).get().apply(tokenRep);
+            output.add(styledToken);
+        }
+
+        Logger.submit(String.join(" ", output));
     }
 }

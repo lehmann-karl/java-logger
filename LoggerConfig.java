@@ -28,7 +28,7 @@ public final class LoggerConfig {
         }
 
         public Builder defaultSource(String source) {
-            this.defaultSource = Objects.requireNonNullElse(source, "application");
+            this.defaultSource = source != null ? source : "application";
             return this;
         }
 

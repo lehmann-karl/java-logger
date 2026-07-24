@@ -16,31 +16,23 @@ public class LogEvent {
         this.message = LogToken.create(LogToken.MESSAGE.class, message);
     }
 
-    protected List<String> format() {
-        List<String> tokens = new ArrayList<String>();
+    protected List<LogToken> format() {
+        List<LogToken> tokens = new ArrayList<LogToken>();
         
         if (Logger.config.showTimestamp()) {
-            String timeRep = timestamp.render();
-            String timestampStyled = LogTheme.getStyle(timestamp).get().apply(timeRep);
-            tokens.add(timestampStyled);
+            tokens.add(timestamp);
         }
 
         if (Logger.config.showLevel()) {
-            String levelRep = level.render();
-            String levelStyled = LogTheme.getStyle(level).get().apply(levelRep);
-            tokens.add(levelStyled);
+            tokens.add(level);
         }
 
         if (Logger.config.showSource()) {
-            String sourceRep = source.render();
-            String sourceStyled = LogTheme.getStyle(source).get().apply(sourceRep);
-            tokens.add(sourceStyled);
+            tokens.add(source);
         }
 
         if (message.value != null) {
-            String messageRep = message.render();
-            String messageStyled = LogTheme.getStyle(message).get().apply(messageRep);
-            tokens.add(messageStyled);
+            tokens.add(message);
         }
 
         return tokens;
