@@ -47,11 +47,11 @@ public final class Logger {
         try {
             if (!queue.offer(output)) {
                 System.err.printf("[LOGGER] %s[ERROR]%s Log queue full: Dropping new logs\n",
-                LogStyle.AnsiColor.RED, LogStyle.AnsiColor.RESET);
+                LogStyle.AnsiColor.RED, LogStyle.AnsiColor.reset());
             }
         } catch (NullPointerException e) {
             System.err.printf("[LOGGER] %s[ERROR]%s Provided output is null\n",
-                LogStyle.AnsiColor.RED, LogStyle.AnsiColor.RESET);
+                LogStyle.AnsiColor.RED, LogStyle.AnsiColor.reset());
         }
         
     }
@@ -141,27 +141,55 @@ public final class Logger {
         DEFAULT_LOGGER.log(message);
     }
 
+    public static void log(Level level, String message) {
+        DEFAULT_LOGGER.log(level, message);
+    }
+
     public static void log(LogEvent log) {
         DEFAULT_LOGGER.log(log);
+    }
+
+    public static void log(Level level, LogEvent log) {
+        DEFAULT_LOGGER.log(level, log);
     }
 
     public static void debug(String message) {
         DEFAULT_LOGGER.debug(message);
     }
 
+    public static void debug(LogEvent log) {
+        DEFAULT_LOGGER.debug(log);
+    }
+
     public static void info(String message) {
         DEFAULT_LOGGER.info(message);
+    }
+
+    public static void info(LogEvent log) {
+        DEFAULT_LOGGER.info(log);
     }
 
     public static void warn(String message) {
         DEFAULT_LOGGER.warn(message);
     }
 
+    public static void warn(LogEvent log) {
+        DEFAULT_LOGGER.warn(log);
+    }
+
     public static void error(String message) {
         DEFAULT_LOGGER.error(message);
     }
 
+    public static void error(LogEvent log) {
+        DEFAULT_LOGGER.error(log);
+    }
+
     public static void fatal(String message) {
         DEFAULT_LOGGER.fatal(message);
+    }
+
+    public static void fatal(LogEvent log) {
+        DEFAULT_LOGGER.fatal(log);
     }
 }

@@ -10,11 +10,11 @@ public abstract class LogToken {
     @LogStyle.TokenStyle(color = LogStyle.AnsiColor.BLUE)
     public static final class TIMESTAMP extends LogToken {
 
-        protected TIMESTAMP(Object value) { super(value); }
+        private TIMESTAMP(Object value, String sep) { super(value, sep); }
         
         @Override
-        public String render() {
-            String timestamp = ((LocalDateTime) value).format(Logger.config.timestampFormatter());
+        protected String render() {
+            String timestamp = ((LocalDateTime) getValue()).format(Logger.config.timestampFormatter());
             return "[" + timestamp + "]";
         }
     }
@@ -52,35 +52,43 @@ public abstract class LogToken {
                 resolveTokenID(LEVEL.class, Logger.Level.FATAL), fatalStyle);
         }
 
-        public LEVEL(Object value) { super(value); }
+        private LEVEL(Object value, String sep) { super(value, sep); }
         
         @Override
-        public String render() { return "[" + value + "]"; }
+        protected String render() { return "[" + getValue() + "]"; }
     }
     
     @LogStyle.TokenStyle(color = LogStyle.AnsiColor.CYAN)
     public static final class SOURCE extends LogToken {
 
-        protected SOURCE(Object value) { super(value); }
+        private SOURCE(Object value, String sep) { super(value, sep); }
         
         @Override
-        public String render() { return "[" + value + "]"; }
+        protected String render() { return "[" + getValue() + "]"; }
     }
 
     public static final class MESSAGE extends LogToken {
 
-        protected MESSAGE(Object value) { super(value); }
+        private MESSAGE(Object value, String sep) { super(value, sep); }
         
         @Override
-        public String render() { return value.toString(); }
+        protected String render() { return getValue().toString(); }
     }
 
     private static final Set<Class<? extends LogToken>> INITIALIZED = ConcurrentHashMap.newKeySet();
+    private static final Set<Class<? extends LogToken>> BUILTIN_TOKEN_TYPES = Set.of(
+            TIMESTAMP.class,
+            LEVEL.class,
+            SOURCE.class,
+            MESSAGE.class);
+    private static final ThreadLocal<LogEvent> ACTIVE_EVENT = new ThreadLocal<>();
 
-    protected Object value;
+    private Object value;
+    private String separator;
 
-    protected LogToken(Object value) {
+    protected LogToken(Object value, String sep) {
         this.value = value;
+        this.separator = sep;
     }
 
     private static void registerAnnotationStyle(Class<? extends LogToken> tokenClass) {
@@ -116,15 +124,51 @@ public abstract class LogToken {
     }
 
     public static <T extends LogToken> T create(Class<T> tokenClass, Object value) {
+        return create(tokenClass, value, " ");
+    }
+
+    public static <T extends LogToken> T create(Class<T> tokenClass, Object value, String sep) {
         Objects.requireNonNull(tokenClass, "tokenClass must not be null");
+        assertTokenCreatePermission(tokenClass);
         registerAnnotationStyle(tokenClass);
         try {
-            Constructor<T> constructor = tokenClass.getDeclaredConstructor(Object.class);
+            Constructor<T> constructor = tokenClass.getDeclaredConstructor(Object.class, String.class);
             constructor.setAccessible(true);
-            return constructor.newInstance(value);
+            T token = constructor.newInstance(value, sep);
+            LogEvent event = ACTIVE_EVENT.get();
+            if (event != null) {
+                if (token instanceof MESSAGE) {
+                    event.addPendingMessageToken(token);
+                } else {
+                    event.addToken(token);
+                }
+            }
+            return token;
         } catch (ReflectiveOperationException ex) {
             throw new IllegalArgumentException("Token class must expose a protected or public constructor accepting (Object)", ex);
         }
+    }
+
+    private static void assertTokenCreatePermission(Class<? extends LogToken> tokenClass) {
+        LogEvent event = ACTIVE_EVENT.get();
+        if (event == null) {
+            throw new IllegalAccessError("LogTokens must be created during LogEvent construction");
+        }
+        if (isBuiltInTokenType(tokenClass) && event.containsToken(tokenClass)) {
+            throw new IllegalAccessError("Built-in token types are restricted to the logger itsself");
+        }
+    }
+
+    private static boolean isBuiltInTokenType(Class<? extends LogToken> tokenClass) {
+        return BUILTIN_TOKEN_TYPES.contains(tokenClass);
+    }
+
+    static void beginCollection(LogEvent event) {
+        ACTIVE_EVENT.set(event);
+    }
+
+    static void endCollection() {
+        ACTIVE_EVENT.remove();
     }
 
     public Object getValue() {
@@ -135,13 +179,13 @@ public abstract class LogToken {
         this.value = value;
     }
 
-    public String render() {
+    protected String render() {
         return String.valueOf(value);
     }
 
     @Override
     public String toString() {
-        return render();
+        return render() + LogStyle.AnsiColor.reset() + separator;
     }
 
     @Override

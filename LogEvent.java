@@ -4,37 +4,80 @@ import java.util.List;
 
 public class LogEvent {
 
-    private final LogToken.TIMESTAMP timestamp;
-    private final LogToken.LEVEL level;
-    private final LogToken.SOURCE source;
-    private final LogToken.MESSAGE message;
+    private final List<LogToken> tokens = new ArrayList<>();
+    private LogToken pendingMessageToken;
 
-    protected LogEvent(Logger.Level level, String source, String message) {
-        this.timestamp = LogToken.create(LogToken.TIMESTAMP.class, LocalDateTime.now());
-        this.level = LogToken.create(LogToken.LEVEL.class, level);
-        this.source = LogToken.create(LogToken.SOURCE.class, source);
-        this.message = LogToken.create(LogToken.MESSAGE.class, message);
+    private LogToken.LEVEL level;
+    private LogToken.SOURCE source;
+
+    protected LogEvent(String message) {
+        LogToken.beginCollection(this);
+        LogToken.create(LogToken.TIMESTAMP.class, LocalDateTime.now());
+        this.level = LogToken.create(LogToken.LEVEL.class, Logger.Level.INFO);
+        this.source = LogToken.create(LogToken.SOURCE.class, Logger.config.defaultSource());
+        LogToken.create(LogToken.MESSAGE.class, message);
     }
 
     protected List<LogToken> format() {
-        List<LogToken> tokens = new ArrayList<LogToken>();
-        
-        if (Logger.config.showTimestamp()) {
-            tokens.add(timestamp);
+        LogToken.endCollection();
+        finalizeTokens();
+
+        List<LogToken> formattedTokens = new ArrayList<>();
+
+        for (LogToken token : tokens) {
+            if (shouldIncludeToken(token)) {
+                formattedTokens.add(token);
+            }
         }
 
-        if (Logger.config.showLevel()) {
-            tokens.add(level);
+        return formattedTokens;
+    }
+
+    void setLevel(Logger.Level level) {
+        this.level.setValue(level);
+    }
+
+    void setSource(String source) {
+        this.source.setValue(source);
+    }
+
+    void addToken(LogToken token) {
+        tokens.add(token);
+    }
+
+    void addPendingMessageToken(LogToken token) {
+        pendingMessageToken = token;
+    }
+
+    boolean containsToken(Class<? extends LogToken> tokenClass) {
+        boolean alreadyInTokens = tokens.stream().anyMatch(token -> token.getClass() == tokenClass);
+        return alreadyInTokens || (pendingMessageToken != null && pendingMessageToken.getClass() == tokenClass);
+    }
+
+    private void finalizeTokens() {
+        if (pendingMessageToken != null && !tokens.contains(pendingMessageToken)) {
+            tokens.add(pendingMessageToken);
+        }
+        pendingMessageToken = null;
+    }
+
+    private boolean shouldIncludeToken(LogToken token) {
+        if (token.getValue() == null) {
+            return false;
         }
 
-        if (Logger.config.showSource()) {
-            tokens.add(source);
+        if (token instanceof LogToken.TIMESTAMP) {
+            return Logger.config.showTimestamp();
         }
 
-        if (message.value != null) {
-            tokens.add(message);
+        if (token instanceof LogToken.LEVEL) {
+            return Logger.config.showLevel();
         }
 
-        return tokens;
+        if (token instanceof LogToken.SOURCE) {
+            return Logger.config.showSource();
+        }
+
+        return true;
     }
 }

@@ -8,7 +8,7 @@ public class LogStyle {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
     public @interface TokenStyle {
-        LogStyle.AnsiColor color() default AnsiColor.RESET;
+        LogStyle.AnsiColor color();
         boolean bold() default false;
         boolean italic() default false;
         boolean underline() default false;
@@ -23,8 +23,7 @@ public class LogStyle {
         BLUE("34"),
         MAGENTA("35"),
         CYAN("36"),
-        WHITE("37"),
-        RESET("0");
+        WHITE("37");
 
         private final String code;
 
@@ -34,6 +33,10 @@ public class LogStyle {
 
         public String code() {
             return code;
+        }
+
+        public static String reset() {
+            return "\u001B[0m";
         }
     }
 
@@ -116,13 +119,13 @@ public class LogStyle {
         if (underline) {
             builder.append("\u001B[4m");
         }
-        if (color != null) {
+        if (color != null && Logger.config.showColor()) {
             builder.append("\u001B[").append(color.code()).append("m");
         }
 
         builder.append(value);
         if (color != null || bold || italic || underline) {
-            builder.append("\u001B[0m");
+            builder.append(AnsiColor.reset());
         }
         return builder.toString();
     }

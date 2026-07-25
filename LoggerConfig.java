@@ -8,6 +8,7 @@ public final class LoggerConfig {
         private boolean showLevel = true;
         private boolean showTimestamp = true;
         private boolean showSource = false;
+        private boolean showColor = true;
         private String defaultSource = "application";
         private DateTimeFormatter timestampFormatter =
                 DateTimeFormatter.ofPattern("HH:mm:ss");
@@ -24,6 +25,11 @@ public final class LoggerConfig {
 
         public Builder showSource(boolean show) {
             this.showSource = show;
+            return this;
+        }
+
+        public Builder showColor(boolean show) {
+            this.showColor = show;
             return this;
         }
 
@@ -50,6 +56,7 @@ public final class LoggerConfig {
     private final boolean showLevel;
     private final boolean showTimestamp;
     private final boolean showSource;
+    private final boolean showColor;
     private final String defaultSource;
     private final DateTimeFormatter timestampFormatter;
 
@@ -57,6 +64,7 @@ public final class LoggerConfig {
         this.showLevel = builder.showLevel;
         this.showTimestamp = builder.showTimestamp;
         this.showSource = builder.showSource;
+        this.showColor = builder.showColor;
         this.defaultSource = builder.defaultSource;
         this.timestampFormatter = builder.timestampFormatter;
     }
@@ -75,6 +83,10 @@ public final class LoggerConfig {
 
     public boolean showSource() {
         return showSource;
+    }
+
+    public boolean showColor() {
+        return showColor;
     }
 
     public String defaultSource() {
