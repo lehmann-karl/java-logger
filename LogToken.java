@@ -1,5 +1,8 @@
 import java.lang.reflect.Constructor;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
@@ -76,11 +79,12 @@ public abstract class LogToken {
     }
 
     private static final Set<Class<? extends LogToken>> INITIALIZED = ConcurrentHashMap.newKeySet();
-    private static final Set<Class<? extends LogToken>> BUILTIN_TOKEN_TYPES = Set.of(
-            TIMESTAMP.class,
-            LEVEL.class,
-            SOURCE.class,
-            MESSAGE.class);
+    private static final Set<Class<? extends LogToken>> BUILTIN_TOKEN_TYPES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+        TIMESTAMP.class,
+        LEVEL.class,
+        SOURCE.class,
+        MESSAGE.class
+    )));
     private static final ThreadLocal<LogEvent> ACTIVE_EVENT = new ThreadLocal<>();
 
     private Object value;
