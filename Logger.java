@@ -137,12 +137,20 @@ public final class Logger {
         DEFAULT_LOGGER.setSource(source);
     }
 
-    public static void log(String message) {
-        DEFAULT_LOGGER.log(message);
+    public static void log(Object... values) {
+        DEFAULT_LOGGER.log(values);
     }
 
-    public static void log(Level level, String message) {
-        DEFAULT_LOGGER.log(level, message);
+    public static void log(Level level, Object... values) {
+        DEFAULT_LOGGER.log(level, values);
+    }
+
+    public static void log(String template, Object... args) {
+        DEFAULT_LOGGER.log(template, args);
+    }
+
+    public static void log(Level level, String template, Object... args) {
+        DEFAULT_LOGGER.log(level, template, args);
     }
 
     public static void log(LogEvent log) {
@@ -153,40 +161,60 @@ public final class Logger {
         DEFAULT_LOGGER.log(level, log);
     }
 
-    public static void debug(String message) {
-        DEFAULT_LOGGER.debug(message);
+    public static void debug(Object... values) {
+        DEFAULT_LOGGER.debug(values);
+    }
+
+    public static void debug(String template, Object... args) {
+        DEFAULT_LOGGER.debug(template, args);
     }
 
     public static void debug(LogEvent log) {
         DEFAULT_LOGGER.debug(log);
     }
 
-    public static void info(String message) {
-        DEFAULT_LOGGER.info(message);
+    public static void info(Object... values) {
+        DEFAULT_LOGGER.info(values);
+    }
+
+    public static void info(String template, Object... args) {
+        DEFAULT_LOGGER.info(template, args);
     }
 
     public static void info(LogEvent log) {
         DEFAULT_LOGGER.info(log);
     }
 
-    public static void warn(String message) {
-        DEFAULT_LOGGER.warn(message);
+    public static void warn(Object... values) {
+        DEFAULT_LOGGER.warn(values);
+    }
+
+    public static void warn(String template, Object... args) {
+        DEFAULT_LOGGER.warn(template, args);
     }
 
     public static void warn(LogEvent log) {
         DEFAULT_LOGGER.warn(log);
     }
 
-    public static void error(String message) {
-        DEFAULT_LOGGER.error(message);
+    public static void error(Object... values) {
+        DEFAULT_LOGGER.error(values);
+    }
+
+    public static void error(String template, Object... args) {
+        DEFAULT_LOGGER.error(template, args);
     }
 
     public static void error(LogEvent log) {
         DEFAULT_LOGGER.error(log);
     }
 
-    public static void fatal(String message) {
-        DEFAULT_LOGGER.fatal(message);
+    public static void fatal(Object... values) {
+        DEFAULT_LOGGER.fatal(values);
+    }
+
+    public static void fatal(String template, Object... args) {
+        DEFAULT_LOGGER.fatal(template, args);
     }
 
     public static void fatal(LogEvent log) {

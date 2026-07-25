@@ -16,6 +16,7 @@ public class LogStyle {
 
     public enum AnsiColor {
         BLACK("30"),
+        GRAY("90"),
         RED("31"),
         DARK_RED("38;5;88"),
         GREEN("32"),
